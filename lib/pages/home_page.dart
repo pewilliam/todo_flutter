@@ -24,6 +24,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void createNewTask() {
+    String newTask = '';
+
     showDialog(
       context: context,
       builder: (context) {
@@ -31,18 +33,23 @@ class _HomePageState extends State<HomePage> {
           title: Text('New Task'),
           content: TextField(
             decoration: InputDecoration(hintText: 'Enter task name'),
+            onChanged: (value) {
+              newTask = value;
+            },
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
+                Navigator.of(context).pop();
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                // Adicione a lógica para criar uma nova tarefa aqui
-                Navigator.of(context).pop(); // Fecha o diálogo
+                setState(() {
+                  toDoList.add([newTask, false]);
+                });
+                Navigator.of(context).pop();
               },
               child: Text('Add'),
             ),
