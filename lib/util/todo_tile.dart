@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class ToDoTile extends StatelessWidget {
   final String taskName;
   final bool isCompleted;
   final Function(bool?)? onChanged;
+  final Function(BuildContext)? deleteFunction;
 
-  const ToDoTile({
+  ToDoTile({
     super.key,
     required this.taskName,
     required this.isCompleted,
     required this.onChanged,
+    required this.deleteFunction,
   });
 
   @override
@@ -20,26 +23,39 @@ class ToDoTile extends StatelessWidget {
         right: 25,
         top: 25,
       ),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.amber.shade200,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
+      child: Slidable(
+        endActionPane: ActionPane(
+          motion: StretchMotion(),
           children: [
-            Checkbox(
-              value: isCompleted,
-              onChanged: onChanged,
-              activeColor: Colors.amber.shade800,
-            ),
-            Text(
-              taskName,
-              style: TextStyle(
-                decoration: isCompleted ? TextDecoration.lineThrough : null,
-              ),
-            ),
+            SlidableAction(
+              onPressed: deleteFunction,
+              icon: Icons.delete,
+              backgroundColor: Colors.red,
+              borderRadius: BorderRadius.circular(10),
+            )
           ],
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade200,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              Checkbox(
+                value: isCompleted,
+                onChanged: onChanged,
+                activeColor: Colors.amber.shade800,
+              ),
+              Text(
+                taskName,
+                style: TextStyle(
+                  decoration: isCompleted ? TextDecoration.lineThrough : null,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:todoapp/util/dialog_box.dart';
 import 'package:todoapp/util/todo_tile.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,6 +12,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _controller = TextEditingController();
+
   List toDoList = [
     ["Make tutorial", false],
     ["Learn Flutter", false],
@@ -23,40 +26,31 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void createNewTask() {
-    String newTask = '';
+  void saveNewTask() {
+    Navigator.of(context).pop();
+    setState(() {
+      toDoList.add([_controller.text, false]);
+      _controller.clear();
+    });
+  }
 
+  void createNewTask() {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('New Task'),
-          content: TextField(
-            decoration: InputDecoration(hintText: 'Enter task name'),
-            onChanged: (value) {
-              newTask = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  toDoList.add([newTask, false]);
-                });
-                Navigator.of(context).pop();
-              },
-              child: Text('Add'),
-            ),
-          ],
+        return DialogBox(
+          controller: _controller,
+          onSave: saveNewTask,
+          onCancel: () => Navigator.of(context).pop(),
         );
       },
     );
+  }
+
+  void deleteTask(int index) {
+    setState(() {
+      toDoList.removeAt(index);
+    });
   }
 
   @override
@@ -78,10 +72,23 @@ class _HomePageState extends State<HomePage> {
       body: ListView.builder(
         itemCount: toDoList.length,
         itemBuilder: (context, index) {
-          return ToDoTile(
-            taskName: toDoList[index][0],
-            isCompleted: toDoList[index][1],
-            onChanged: (value) => checkBoxChanged(value, index),
+          return Dismissible(
+            key: Key(toDoList[index][0]),
+            onDismissed: (direction) {
+              deleteTask(index);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Task deleted"),
+                ),
+              );
+            },
+            background: Container(color: Colors.red),
+            child: ToDoTile(
+              taskName: toDoList[index][0],
+              isCompleted: toDoList[index][1],
+              onChanged: (value) => checkBoxChanged(value, index),
+              deleteFunction: (context) => deleteTask(index),
+            ),
           );
         },
       ),
