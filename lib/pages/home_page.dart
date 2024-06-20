@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:todoapp/data/database.dart';
 import 'package:todoapp/util/dialog_box.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todoapp/util/todo_tile.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,25 +15,34 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
+  final _mybox = Hive.box('mybox');
+  ToDoDatabase db = ToDoDatabase();
 
-  List toDoList = [
-    ["Make tutorial", false],
-    ["Learn Flutter", false],
-    ["Play videogames", false],
-  ];
+  @override
+  void initState() {
+    if (_mybox.get("TODOLIST") == null) {
+      db.createInitialData();
+    } else {
+      db.loadData();
+    }
+
+    super.initState();
+  }
 
   void checkBoxChanged(bool? value, int index) {
     setState(() {
-      toDoList[index][1] = !toDoList[index][1];
+      db.toDoList[index][1] = !db.toDoList[index][1];
     });
+    db.updateData();
   }
 
   void saveNewTask() {
     Navigator.of(context).pop();
     setState(() {
-      toDoList.add([_controller.text, false]);
+      db.toDoList.add([_controller.text, false]);
       _controller.clear();
     });
+    db.updateData();
   }
 
   void createNewTask() {
@@ -49,8 +60,9 @@ class _HomePageState extends State<HomePage> {
 
   void deleteTask(int index) {
     setState(() {
-      toDoList.removeAt(index);
+      db.toDoList.removeAt(index);
     });
+    db.updateData();
   }
 
   @override
@@ -70,10 +82,10 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       body: ListView.builder(
-        itemCount: toDoList.length,
+        itemCount: db.toDoList.length,
         itemBuilder: (context, index) {
           return Dismissible(
-            key: Key(toDoList[index][0]),
+            key: Key(db.toDoList[index][0]),
             onDismissed: (direction) {
               deleteTask(index);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -84,8 +96,8 @@ class _HomePageState extends State<HomePage> {
             },
             background: Container(color: Colors.red),
             child: ToDoTile(
-              taskName: toDoList[index][0],
-              isCompleted: toDoList[index][1],
+              taskName: db.toDoList[index][0],
+              isCompleted: db.toDoList[index][1],
               onChanged: (value) => checkBoxChanged(value, index),
               deleteFunction: (context) => deleteTask(index),
             ),
