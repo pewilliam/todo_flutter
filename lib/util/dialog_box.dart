@@ -6,7 +6,7 @@ class DialogBox extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onCancel;
 
-  DialogBox({
+  const DialogBox({
     super.key,
     required this.controller,
     required this.onSave,
@@ -17,14 +17,14 @@ class DialogBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.amber.shade300,
-      content: Container(
+      content: SizedBox(
         height: 140,
         width: 300,
         child: Column(
           children: [
             TextField(
               controller: controller,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                   border: OutlineInputBorder(), hintText: "Nova tarefa"),
             ),
             Row(
